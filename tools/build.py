@@ -63,7 +63,7 @@ SCREEN_NAME = "PLUMB"               # the update loader's screen (FM-1, ldr_scre
 SCREEN_COLOUR = 0xE58A              # the plumb bob's brass, #E2B054
 FM1_PRODUCT = "FM-1_582961"         # PLUMB keeps this identity across releases (as BUOY, BEACHCOMBER, whywhywhy)
 PRODUCT = FM1_PRODUCT
-VERSION = "0.1"                     # APP_VER (a release build: --release X.Y)
+VERSION = "0.2"                     # APP_VER (a release build: --release X.Y)
 
 
 def toolchain():

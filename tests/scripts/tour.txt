@@ -1,4 +1,5 @@
 # PLUMB tour: REC a new row, SEL catches a pendulum, STOP and PLAY, the GRID, the ARP with LATCH, a MIDI START
+300 btn 12
 1500 btn 13
 1600 keys 0x80
 1650 keys 0

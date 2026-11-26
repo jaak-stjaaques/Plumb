@@ -733,7 +733,12 @@ static void draw_env_rows(void)
     ui_row(3, "RELEASE", v, C_BOB);
 }
 
-/* --- LFO: the wave, and where it is now */
+/* --- LFO: the wave, and where it is now. TIMBRE is called after what it moves: FOLDS, DCW or FORMANT */
+static const char *lfo_target_name(uint8_t t)
+{
+    return t == LFO_TIMBRE ? engine_k1_names[pat.engine % ENGINES] : lfo_target_names[t % LFO_TARGETS];
+}
+
 static void draw_lfo_pic(void)
 {
     static const int16_t held_v[] = {18000, -11000, 29000, 7000, -28000, 13000, -3000, 24000};
@@ -764,7 +769,7 @@ static void draw_lfo_pic(void)
 static void draw_lfo_rows(void)
 {
     char v[12];
-    ui_row(0, "TARGET", lfo_target_names[pat.lfo_target], pat.lfo_target == LFO_GRAVITY ? C_TIME : C_BOB);
+    ui_row(0, "TARGET", lfo_target_name(pat.lfo_target), pat.lfo_target == LFO_GRAVITY ? C_TIME : C_BOB);
     ui_row(1, "WAVE", lfo_wave_names[pat.lfo_wave], C_BOB);
     uint16_t h = lfo_hundredths[pat.lfo_rate];
     char *p = put_num(v, h / 100u, 0);
@@ -892,7 +897,11 @@ static void edit_page(uint8_t page, const int32_t s[4])
         pat.release = (uint8_t)step_clamp(pat.release, s[3], 0, ENV_STEPS - 1);
         break;
     case P_LFO:
-        pat.lfo_target = (uint8_t)step_clamp(pat.lfo_target, s[0], 0, LFO_TARGETS - 1);
+        if (s[0]) {                             /* PITCH, FOLDS (DCW, FORMANT), SPARK, LEVEL, GRAVITY */
+            int32_t at = 0;
+            for (uint32_t i = 0; i < LFO_TARGETS; i++) if (lfo_order[i] == pat.lfo_target) at = (int32_t)i;
+            pat.lfo_target = lfo_order[step_clamp(at, s[0], 0, LFO_TARGETS - 1)];
+        }
         pat.lfo_wave = (uint8_t)step_clamp(pat.lfo_wave, s[1], 0, LFO_WAVES - 1);
         pat.lfo_rate = (uint8_t)step_clamp(pat.lfo_rate, s[2], 0, LFO_RATES - 1);
         pat.lfo_depth = pct(pat.lfo_depth, s[3]);
@@ -973,6 +982,7 @@ static void draw_footer(uint8_t page)
     switch (page) {
     case P_HOME:
         if (rec_on) { p = put_str(b, "REC: KEYS INTO PENDULUM "); put_num(p, picked + 1, 0); ui_footer(b, C_REC); break; }
+        if (!clk_run) { ui_footer("PLAY: RELEASE THEM", C_TIME); break; }
         p = put_str(b, pend_caught[picked] ? "SEL: LET " : "SEL: CATCH ");
         p = put_num(p, picked + 1, 0);
         put_str(p, pend_caught[picked] ? " SWING" : "   REC: ROW");
@@ -991,7 +1001,10 @@ static void draw_footer(uint8_t page)
     case P_ARP: ui_footer(arp.on ? "HOLD KEYS: THE PENDULUMS PLAY" : "ARP: TURN THE ARP ON", C_OFF); break;
     case P_EDIT: ui_footer("SPARK: HOW THE STRIKE OPENS IT", C_OFF); break;
     case P_ENV: ui_footer("EVERY STRIKE", C_OFF); break;
-    case P_LFO: ui_footer(pat.lfo_target == LFO_GRAVITY ? "GRAVITY BENDS THEIR TIME" : "ONE LFO FOR ALL TWELVE", C_OFF); break;
+    case P_LFO:
+        ui_footer(pat.lfo_target == LFO_GRAVITY ? "GRAVITY BENDS THEIR TIME" :
+                  pat.lfo_target == LFO_SPARK ? "SPARK: HOW EACH STRIKE OPENS" : "ONE LFO FOR ALL TWELVE", C_OFF);
+        break;
     case P_FX: ui_footer("IN PARALLEL", C_OFF); break;
     default:
         p = put_str(b, "KEYS: TRANSPOSE   ROOT ");
@@ -1037,7 +1050,7 @@ static uint32_t row_state(uint8_t page)
     case P_SEQ: MIX(pat.cycle); MIX(pat.swings); MIX(pat.strike); MIX(pat.grid); MIX(pat.count); break;
     case P_EDIT: MIX(pat.engine); MIX(pat.k1); MIX(pat.k2); MIX(pat.spark); MIX(pat.width); break;
     case P_ENV: MIX(pat.attack); MIX(pat.decay); MIX(pat.sustain); MIX(pat.release); break;
-    case P_LFO: MIX(pat.lfo_target); MIX(pat.lfo_wave); MIX(pat.lfo_rate); MIX(pat.lfo_depth); break;
+    case P_LFO: MIX(pat.lfo_target); MIX(pat.lfo_wave); MIX(pat.lfo_rate); MIX(pat.lfo_depth); MIX(pat.engine); break;
     case P_ARP: MIX(arp.pattern); MIX(arp.range); MIX(arp.chance); MIX(arp.latch); break;
     case P_FX: MIX(pat.reverb); MIX(pat.echo); MIX(pat.echo_time); MIX(pat.chorus); break;
     default: MIX(scale_now.scale); MIX(set.tempo); MIX(set.sync_int); MIX(set.ch); MIX(clock_bpm10()); MIX(clk_ext()); break;
@@ -1092,7 +1105,7 @@ static void app_main(void)
 
     draw_boot_logo();
     uint32_t boot_started = fm1_ms;
-    clock_start();                              /* they are released as the logo shows */
+    /* (nothing plays at power-on: PLAY releases them) */
     for (;;) {
         if (mirror_poll()) drawn_page = 0xFF;   /* FM-1 Mirror opened: everything again */
         if (backup_poll()) { platform_poll(); continue; }
@@ -1303,7 +1316,7 @@ static void app_main(void)
         }
         uint32_t fs = (uint32_t)(uintptr_t)message ^ message_at * 31u ^ (uint32_t)picked << 3 ^ (uint32_t)rec_on << 8 ^
                       (uint32_t)pend_caught[picked] << 9 ^ (uint32_t)scale_root_pc() << 10 ^ (uint32_t)arp.on << 14 ^
-                      clk_run << 15 ^ pd_running << 16 ^
+                      clk_run << 15 ^ pd_running << 16 ^ (uint32_t)pat.lfo_target << 24 ^
                       (page == P_SEQ ? (uint32_t)(((uint64_t)pd_c32 * cycle_beats[pat.cycle]) >> 32) << 17 : 0u);
         if (fs != drawn_footer) { draw_footer(page); drawn_footer = fs; }
 #if !BOARD_SMK37

@@ -25,7 +25,8 @@
 enum { ENG_FOLD, ENG_PHASE, ENG_PULSAR, ENGINES };
 enum { SHAPE_SAW, SHAPE_SQUARE, SHAPE_PULSE, SHAPE_DOUBLE, SHAPES };
 enum { STRIKE_MIDDLE, STRIKE_ONE_WAY, STRIKE_LEFT, STRIKE_WALLS, STRIKES };
-enum { LFO_PITCH, LFO_TIMBRE, LFO_LEVEL, LFO_GRAVITY, LFO_TARGETS };
+enum { LFO_PITCH, LFO_TIMBRE, LFO_LEVEL, LFO_GRAVITY, LFO_SPARK, LFO_TARGETS };   /* (stored in presets: add at the end) */
+static const uint8_t lfo_order[LFO_TARGETS] = {LFO_PITCH, LFO_TIMBRE, LFO_SPARK, LFO_LEVEL, LFO_GRAVITY};   /* the knob's order */
 enum { LW_SINE, LW_TRIANGLE, LW_RANDOM, LW_DRIFT, LFO_WAVES };
 enum { ROW_RISE, ROW_FALL, ROW_ARCH, ROW_VALLEY, ROW_ZIGZAG, ROW_CHORD, ROW_FIFTHS, ROW_SCATTER, ROWS };
 enum { PAT_UP, PAT_DOWN, PAT_BOUNCE, PAT_RANDOM, PAT_SPREAD, PATTERNS };
@@ -33,7 +34,8 @@ enum { PAT_UP, PAT_DOWN, PAT_BOUNCE, PAT_RANDOM, PAT_SPREAD, PATTERNS };
 static const char *const engine_names[ENGINES] = {"FOLD", "PHASE", "PULSAR"};
 static const char *const shape_names[SHAPES] = {"SAW", "SQUARE", "PULSE", "DOUBLE"};
 static const char *const strike_names[STRIKES] = {"MIDDLE", "ONE WAY", "LEFT WALL", "BOTH WALLS"};
-static const char *const lfo_target_names[LFO_TARGETS] = {"PITCH", "TIMBRE", "LEVEL", "GRAVITY"};
+static const char *const lfo_target_names[LFO_TARGETS] = {"PITCH", "TIMBRE", "LEVEL", "GRAVITY", "SPARK"};
+static const char *const engine_k1_names[3] = {"FOLDS", "DCW", "FORMANT"};   /* what TIMBRE moves, by engine */
 static const char *const lfo_wave_names[LFO_WAVES] = {"SINE", "TRIANGLE", "RANDOM", "DRIFT"};
 static const char *const row_names[ROWS] = {"RISE", "FALL", "ARCH", "VALLEY", "ZIGZAG", "CHORD", "FIFTHS", "SCATTER"};
 static const char *const pattern_names[PATTERNS] = {"UP", "DOWN", "BOUNCE", "RANDOM", "SPREAD"};
@@ -92,7 +94,8 @@ static uint32_t env_step(uint8_t index)         /* the change a frame (Q24) for 
 {
     if (index >= ENV_STEPS) index = ENV_STEPS - 1u;
     uint32_t frames = (uint32_t)env_ms[index] * (FS / 100u) / 10u;
-    return frames ? (1u << 24) / frames + 1u : 1u << 24;
+    if (frames < 64u) frames = 64u;             /* at least 1.5 ms: a jump from silence is a click */
+    return (1u << 24) / frames + 1u;
 }
 
 /* ------------------------------------------------------------------------------------------------- voices */
@@ -103,6 +106,12 @@ typedef struct {
     int32_t vel;                                /* Q15 */
     int32_t gl, gr;                             /* the pan, Q15 */
     int32_t lp;                                 /* FOLD's low-pass gate */
+    int32_t gain_q8;                            /* FOLD's fold gain now (it glides, never jumps: no clicks) */
+    uint32_t knee, s1, s2, rd, fq8;             /* PHASE's bend, PULSAR's grain: taken only as a cycle starts */
+    uint32_t fade;                              /* a stolen voice: frames of its fade-out left before the next strike */
+    int32_t nx_pitch, nx_vel, nx_gl, nx_gr;     /* ... and that strike */
+    uint32_t nx_gate;
+    uint8_t nx_tag;
     uint32_t ph, gate, wait, age;               /* gate: frames left (0xFFFFFFFF: a held key) */
     uint8_t stage, tag, pend;                   /* tag: the key holding it (0: none); pend: the pendulum + 1 */
 } voice_t;
@@ -110,25 +119,41 @@ static voice_t vo[NVOICE];
 static uint32_t vo_age;
 static volatile uint16_t pend_level[PENDULUMS];  /* for the screen: how loud each pendulum's last strike still is */
 
-static void voice_start(uint32_t v, int32_t pitch, int32_t vel, int32_t pan, uint32_t gate, uint32_t wait,
-                        uint8_t tag, uint8_t pend)
+#define STEAL_FADE 64u                          /* 1.5 ms: a stolen voice fades out, then strikes anew (no click) */
+
+static void voice_begin(voice_t *x)             /* the next strike, from silence */
 {
-    voice_t *x = &vo[v];
-    x->pitch = pitch;
-    x->vel = vel;
-    /* pan -32767 (left) .. 32767 (right): an equal-power law from the sine table */
-    uint32_t a = (uint32_t)(pan + 32768) << 14;  /* 0 .. 2^30: a quarter cycle */
-    x->gl = sinq(a + 0x40000000u);
-    x->gr = sinq(a);
-    x->gate = gate;
-    x->wait = wait;
-    x->tag = tag;
-    x->pend = pend;
-    x->age = ++vo_age;
+    x->pitch = x->nx_pitch;
+    x->vel = x->nx_vel;
+    x->gl = x->nx_gl;
+    x->gr = x->nx_gr;
+    x->gate = x->nx_gate;
+    x->tag = x->nx_tag;
     x->stage = ST_ATTACK;
     x->env = 0;
     x->ph = 0;
     x->lp = 0;
+    x->gain_q8 = 256;
+    x->knee = 0;
+    x->fade = 0;
+}
+
+static void voice_start(uint32_t v, int32_t pitch, int32_t vel, int32_t pan, uint32_t gate, uint32_t wait,
+                        uint8_t tag, uint8_t pend)
+{
+    voice_t *x = &vo[v];
+    /* pan -32767 (left) .. 32767 (right): an equal-power law from the sine table */
+    uint32_t a = (uint32_t)(pan + 32768) << 14;  /* 0 .. 2^30: a quarter cycle */
+    x->nx_pitch = pitch;
+    x->nx_vel = vel;
+    x->nx_gl = sinq(a + 0x40000000u);
+    x->nx_gr = sinq(a);
+    x->nx_gate = gate;
+    x->nx_tag = tag;
+    x->pend = pend;
+    x->age = ++vo_age;
+    if (x->stage == ST_IDLE) { x->wait = wait; voice_begin(x); }
+    else { x->wait = 0; x->fade = STEAL_FADE; x->tag = 0; }   /* still sounding: fade it out first */
 }
 
 static uint32_t voice_cap = NVOICE;             /* fewer when the sound runs short of time (app_audio) */
@@ -343,13 +368,15 @@ static void pendulums_block(uint32_t frames)
 /* ------------------------------------------------------------------------------------------------ one voice */
 static int32_t vbuf_l[HALF_FRAMES], vbuf_r[HALF_FRAMES];
 
-static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t timbre_mod, int32_t level)
+static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t timbre_mod, int32_t spark_mod,
+                         int32_t level0, int32_t level)
 {
     uint32_t up = env_step(pat.attack), down = env_step(pat.decay), rel = env_step(pat.release);
     int32_t sustain = (int32_t)((uint32_t)pat.sustain * (1u << 24) / 100u);
     uint32_t inc = inc_of(x->pitch + pitch_mod);
     uint8_t eng = pat.engine;
-    int32_t peak = 0, vl = ((x->vel * level) >> 15) >> 1;   /* the strike x the LFO's tremolo, Q14 */
+    int32_t peak = 0;
+    int32_t spark = clampi((int32_t)pat.spark * 327 + spark_mod, 0, 32767);
     for (uint32_t f0 = 0; f0 < frames; f0 += SUB) {
         uint32_t n = frames - f0 < SUB ? frames - f0 : SUB;
         uint32_t start = 0;
@@ -360,15 +387,19 @@ static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t
         }
         /* the timbre, once every 16 frames: the knob, plus SPARK x the envelope, plus the LFO */
         int32_t e15 = x->env >> 9;              /* Q15 */
-        int32_t tim = (int32_t)pat.k1 * 327 + mul15(e15, (int32_t)pat.spark * 327) + timbre_mod;
+        int32_t tim = (int32_t)pat.k1 * 327 + mul15(e15, spark) + timbre_mod;
+        /* the LFO's tremolo, from the last block's level to this one's, 16 frames at a time */
+        int32_t lv = level0 + (level - level0) * (int32_t)f0 / (int32_t)frames;   /* (32-bit: no 64-bit division) */
+        int32_t vl = ((x->vel * lv) >> 15) >> 1;   /* the strike x the tremolo, Q14 */
         tim = clampi(tim, 0, 32767);            /* 0 .. 1 (Q15) */
         /* the engine's coefficients */
         int32_t gain_q8 = 256, sym = 0, kq = Q15;
         uint32_t knee = 32768, slope1 = 65536, slope2 = 65536, rd = 0, fq8 = 256;
         if (eng == ENG_FOLD) {
-            gain_q8 = 256 + tim * 9 / 128;      /* up to ~9.9x: many folds */
+            gain_q8 = 256 + tim * 9 / 128;      /* up to ~9.9x: many folds (where the gain glides to) */
             sym = ((int32_t)pat.k2 - 50) * 400;
-            kq = 1200 + mul15(e15, 31000 - 1200);    /* the gate: the envelope opens the low-pass too */
+            kq = 1200 + mul15(e15, 19000 - 1200);    /* the gate: the envelope opens the low-pass too (never fully:
+                                                 * hard folds are bright enough, and sharp corners alias) */
         } else if (eng == ENG_PHASE) {
             int32_t d = mul15(tim, 31500);      /* the distortion 0 .. 0.96 */
             uint32_t shape = pat.k2 % SHAPES;
@@ -386,6 +417,16 @@ static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t
             fq8 = 256u + (uint32_t)tim * 11u / 128u;   /* the formant: 1x .. 12x the note */
         }
         for (uint32_t i = start; i < n; i++) {
+            uint32_t fade = 0;
+            if (x->fade) {                      /* stolen: out over 1.5 ms, then the new strike */
+                fade = --x->fade;
+                if (!fade || x->stage == ST_IDLE) {
+                    voice_begin(x);
+                    inc = inc_of(x->pitch + pitch_mod);
+                    vl = ((x->vel * lv) >> 15) >> 1;
+                    fade = 0;
+                }
+            }
             /* the envelope */
             if (x->gate != 0xFFFFFFFFu && x->gate) { if (--x->gate == 0u && x->stage != ST_IDLE) x->stage = ST_RELEASE; }
             switch (x->stage) {
@@ -396,16 +437,20 @@ static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t
             }
             uint32_t ph = x->ph;
             x->ph = ph + inc;
+            if (x->ph < ph || !x->knee) {           /* a new cycle: its bend and its grain */
+                x->knee = knee; x->s1 = slope1; x->s2 = slope2; x->rd = rd; x->fq8 = fq8;
+            }
             int32_t s;
             if (eng == ENG_FOLD) {
-                int32_t v = ((sinq(ph) * gain_q8) >> 8) + sym;
+                x->gain_q8 += (gain_q8 - x->gain_q8) >> 4;
+                int32_t v = ((sinq(ph) * x->gain_q8) >> 8) + sym;
                 uint32_t u = (uint32_t)(v + 32768) & 0x1FFFFu;          /* a triangle fold, 131072 a period */
                 if (u > 65536u) u = 131072u - u;
                 s = (int32_t)u - 32768;
                 x->lp += ((s - x->lp) * (kq >> 1)) >> 14;
                 s = x->lp;
             } else if (eng == ENG_PHASE) {
-                uint32_t p16 = ph >> 16, w;
+                uint32_t p16 = ph >> 16, w, knee = x->knee, slope1 = x->s1, slope2 = x->s2;
                 uint32_t shape = pat.k2 % SHAPES;
                 if (shape == SHAPE_DOUBLE) p16 = (p16 << 1) & 0xFFFFu;
                 if (shape == SHAPE_SQUARE) {
@@ -422,22 +467,23 @@ static void voice_render(voice_t *x, uint32_t frames, int32_t pitch_mod, int32_t
                 if (shape == SHAPE_DOUBLE && (ph >> 31)) s = s / 2;   /* (the CZ's double sine: the second half softer) */
             } else {
                 uint32_t p16 = ph >> 16;
-                uint32_t local = (p16 * rd) >> 8;
+                uint32_t local = (p16 * x->rd) >> 8;
                 if (local >= 65536u) s = 0;
                 else {
                     int32_t win = sinq(local << 15);            /* half a sine over the grain */
-                    s = (sinq((local * fq8) << 8) * win) >> 15;
+                    s = (sinq((local * x->fq8) << 8) * win) >> 15;
                 }
             }
             /* the level: the envelope, the strike, the LFO's tremolo */
             int32_t a = ((x->env >> 9) * vl) >> 14;   /* (32-bit products only: the chip is 32-bit) */
+            if (x->fade) a = (a * (int32_t)fade) >> 6;   /* (STEAL_FADE = 64) */
             s = (s * a) >> 15;
             int32_t m = s < 0 ? -s : s;
             if (m > peak) peak = m;
             vbuf_l[f0 + i] += (s * x->gl) >> 15;
             vbuf_r[f0 + i] += (s * x->gr) >> 15;
         }
-        if (x->stage == ST_IDLE) break;
+        if (x->stage == ST_IDLE && !x->fade) break;
     }
     if (x->pend && x->pend <= PENDULUMS) {
         uint16_t lv = (uint16_t)(peak > 32767 ? 32767 : peak);
@@ -454,7 +500,10 @@ static void plumb_render(int32_t *out, uint32_t frames)
         cmd_r++;
         if (c.on) voice_start(voice_pick(), c.pitch, c.vel, 0, 0xFFFFFFFFu, 0, c.tag, 0);
         else for (uint32_t v = 0; v < NVOICE; v++)
+            {
+            if (vo[v].fade && vo[v].nx_tag == c.tag) vo[v].nx_gate = 1;   /* (let go while it was still fading in) */
             if (vo[v].tag == c.tag && vo[v].stage != ST_IDLE) { vo[v].tag = 0; vo[v].gate = 0; vo[v].stage = ST_RELEASE; }
+        }
     }
     /* the LFO, once a block */
     uint32_t before = lfo_ph;
@@ -463,7 +512,9 @@ static void plumb_render(int32_t *out, uint32_t frames)
     int32_t l = lfo_value(), mod = l * pat.lfo_depth / 100;
     lfo_now = l;
     int32_t pitch_mod = pat.lfo_target == LFO_PITCH ? mod >> 7 : 0;   /* +- 1 semitone */
-    int32_t timbre_mod = pat.lfo_target == LFO_TIMBRE ? mod / 2 : 0;
+    int32_t timbre_mod = pat.lfo_target == LFO_TIMBRE ? mod / 2 : 0;   /* +- 50 points of KNOB 1 (FOLDS, DCW, FORMANT) */
+    int32_t spark_mod = pat.lfo_target == LFO_SPARK ? mod : 0;         /* +- 100 points of SPARK */
+    static int32_t level0 = Q15;
     int32_t level = pat.lfo_target == LFO_LEVEL ? Q15 - (32767 - l) * pat.lfo_depth / 200 : Q15;
     /* GRAVITY: the pendulums' time, pulled ahead and held back (up to 1/16 of a cycle) */
     pd.grav = pat.lfo_target == LFO_GRAVITY ? mod * 8192 : 0;
@@ -471,7 +522,8 @@ static void plumb_render(int32_t *out, uint32_t frames)
 
     for (uint32_t i = 0; i < frames; i++) vbuf_l[i] = vbuf_r[i] = 0;
     for (uint32_t v = 0; v < NVOICE; v++)
-        if (vo[v].stage != ST_IDLE) voice_render(&vo[v], frames, pitch_mod, timbre_mod, level);
+        if (vo[v].stage != ST_IDLE) voice_render(&vo[v], frames, pitch_mod, timbre_mod, spark_mod, level0, level);
+    level0 = level;
     for (uint32_t i = 0; i < frames; i++) {
         out[2u * i] += vbuf_l[i] * 3 / 8;       /* (headroom: eight voices at once) */
         out[2u * i + 1u] += vbuf_r[i] * 3 / 8;

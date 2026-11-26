@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.1 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.2 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -30,6 +30,8 @@ SEL: CATCH 1   REC: ROW                  what a button does here, or what just h
 
 **MEET** lights up as they come together. **STOPPED** means the transport is stopped (PLAY), **STILL** that DAMP
 has let them come to rest.
+
+PLUMB is silent at power-on: the pendulums hang still until you press **PLAY**.
 
 ## The panel
 
@@ -111,7 +113,7 @@ play holds as long as you hold it.
 
 | Knob | | |
 | --- | --- | --- |
-| 1 | **TARGET** | **PITCH** (±1 semitone), **TIMBRE** (KNOB 1 of EDIT), **LEVEL**, or **GRAVITY**: the pendulums' time is pulled ahead and held back. They still meet at the end of the cycle |
+| 1 | **TARGET** | **PITCH** (±1 semitone); **FOLDS** (KNOB 1 of EDIT, ±50 %; with PHASE it reads **DCW**, with PULSAR **FORMANT**); **SPARK** (±100 %: how much each strike opens the sound); **LEVEL**; or **GRAVITY**: the pendulums' time is pulled ahead and held back. They still meet at the end of the cycle |
 | 2 | **WAVE** | SINE, TRIANGLE, RANDOM, DRIFT |
 | 3 | **RATE** | 0.01 to 20 Hz |
 | 4 | **DEPTH** | 0 to 100 % |

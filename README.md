@@ -1,7 +1,7 @@
 # PLUMB
 
 <p align="center">
-  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.1">
+  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.2">
   <img src="docs/screenshots/home.png" width="320" alt="HOME page: twelve bobs seen from above, swinging across their lanes in a snake, one striking the blue line">
 </p>
 <p align="center">
@@ -14,7 +14,8 @@
 
 PLUMB is a firmware for the **M‑VAVE FM‑1** where **the rhythm is a pendulum wave**.
 
-Twelve pendulums hang in a row, each a little shorter than the one before. **PLAY releases them together.**
+Twelve pendulums hang in a row, each a little shorter than the one before. They hang still until **PLAY releases
+them together.**
 Pendulum *k* swings `SWINGS + k` times in one CYCLE, so they leave in a line, turn into a snake, split into two rows,
 three, scatter into what looks like chaos, and **meet again, all in a line, at the end of the cycle**. Each time a bob
 passes its strike point it plays its note. Nothing is random; nothing repeats until the cycle does.
@@ -32,7 +33,8 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
   duty). **SPARK** is how much the strike itself opens the sound.
 - **The ARP lets the pendulums play your keys**: hold a chord and the strikes walk through it (UP, DOWN, BOUNCE,
   RANDOM, or SPREAD: pendulum *k* plays note *k*), with RANGE, CHANCE and LATCH.
-- **The LFO can bend time**: its GRAVITY target pulls the pendulums ahead and holds them back, and they still meet.
+- **The LFO** moves PITCH, FOLDS (DCW, FORMANT), SPARK or LEVEL, or **bends time**: its GRAVITY target pulls the
+  pendulums ahead and holds them back, and they still meet.
 - **48 scales**, common and exotic. On the GLO page the keys transpose everything.
 - **The cycle line is on every page**: the beat of the cycle, and when they meet again.
 - **Dinghy inside**: MIDI clock sync (a DAW's START releases the pendulums on its downbeat), MIDI in and out (every
@@ -42,7 +44,7 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
 
 [Read the operator manual](docs/OPERATOR-MANUAL.md) · [Credits and licenses](LICENSING.md) · [Changelog](CHANGELOG.md)
 
-**Version 0.1** builds as `plumb.fwsc` (a tagged release: `plumb-0.1.fwsc`). The host tests pass. It has **not yet
+**Version 0.2** builds as `plumb.fwsc` (a tagged release: `plumb-0.2.fwsc`). The host tests pass. It has **not yet
 been installed on a physical FM‑1**.
 
 ## Build

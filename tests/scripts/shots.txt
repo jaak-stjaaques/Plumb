@@ -1,5 +1,6 @@
 # The screenshots of docs/screenshots: tests/run_host.sh tests/scripts/shots.txt (PLUMB)
 # boot 900, home 4200, seq 5200, edit 6000, env 6600, lfo 7200, fx 7800, arp 9800, glo 10600
+2000 btn 12
 900 shot
 4200 shot
 4300 btn 11
@@ -9,6 +10,7 @@
 6100 btn 4
 6600 shot
 6700 btn 5
+6710 enc 2 1
 7200 shot
 7300 btn 2
 7800 shot

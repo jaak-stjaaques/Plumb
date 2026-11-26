@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2 – 2026-11-25
+
+- **No more crackle.** A pendulum that strikes while all eight voices sound takes one over: that voice now fades out
+  over 1.5 ms before the new strike, where it used to be cut off (and silenced until its strike). The envelope never
+  jumps from silence in less than 1.5 ms. PULSAR's grain and PHASE's bend change only as a cycle starts; FOLD's fold
+  glides; the LFO's LEVEL moves smoothly; FOLD's low-pass gate never opens fully (hard folds alias). On the host:
+  from 451 clicks to 23 over the eight presets, the rest FOLD's own corners.
+- **LFO TARGET: FOLDS and SPARK.** TIMBRE is now called after what it moves (FOLDS, DCW or FORMANT), and SPARK is new.
+  The order on the knob: PITCH, FOLDS, SPARK, LEVEL, GRAVITY. Saved presets keep their targets.
+- **Silent at power-on**: the pendulums hang still until PLAY.
+
 ## 0.1 – 2026-11-25
 
 The first PLUMB: a pendulum wave on the FM-1.
