@@ -1,0 +1,12 @@
+{
+  "what": "A pendulum wave: twelve pendulums released together drift into snakes, rows and chaos and meet again at the end of every cycle; each strike plays its note. Polyrhythm from physics, three oscillator engines (wavefolder, phase distortion, pulsar), 48 scales, an ARP the pendulums play.",
+  "kinds": [
+    "synth",
+    "sequencer"
+  ],
+  "play": "https://joakimeriksson.github.io/fm1-emu/",
+  "cheat": "https://github.com/jaak-stjaaques/untitled/blob/main/docs/OPERATOR-MANUAL.md",
+  "image": "docs/screenshots/home.png",
+  "color": "#E2B054",
+  "sounds": "presets"
+}
