@@ -1,16 +1,5 @@
 # Changelog
 
-## 0.4 – 2026-11-25
-
-Effects with the pendulums' character, for the same memory and CPU as before.
-
-- **The reverb BLOOMs**: a little smaller and darker while the pendulums are scattered, longer, brighter and a little
-  louder as they come back into a line; every cycle ends in a swell. The new **BLOOM** knob says how much.
-- **The SWING ECHO** replaces the mono echo: a ping-pong that starts on the left and swings right, left, narrower and
-  darker each pass, until it comes to rest in the middle.
-- The FX page: REVERB, BLOOM, ECHO, TIME; the picture shows the room over the cycle and the echo coming to rest.
-- The chorus is gone (BLOOM took its knob). Saved presets' CHORUS value becomes their BLOOM.
-
 ## 0.3 – 2026-11-25
 
 - **CYCLE goes to 96 and 128 beats**: at 96 BPM, 128 beats is 80 seconds before they meet again. Saved presets keep
