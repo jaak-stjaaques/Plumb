@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.3 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.4 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -139,9 +139,23 @@ play holds as long as you hold it.
 
 ## FX
 
-<p align="center"><img src="screenshots/fx.png" width="320" alt="FX: a strike, its echoes and the reverb's tail; the knobs REVERB, ECHO, TIME, CHORUS"></p>
+<p align="center"><img src="screenshots/fx.png" width="320" alt="FX: on the left the room over one cycle, larger at both ends where the pendulums meet, a dot at now; on the right the swing echo, its repeats zigzagging left and right and narrowing; the knobs REVERB, BLOOM, ECHO, TIME"></p>
 
-REVERB, ECHO, TIME (the echo, 1/32 to a dotted 1/4, on the tempo) and CHORUS, in parallel.
+Two effects with the pendulums' character, side by side (in parallel: neither feeds the other).
+
+- **The room BLOOMs.** The reverb is a little smaller and darker while the pendulums are scattered, and opens (a
+  longer, brighter, slightly louder tail) as they come back into a line. Every cycle ends in a swell. The picture's
+  left half is the room over one cycle; the dot is now.
+- **The SWING ECHO comes to rest.** The first repeat is on the left, the next on the right, then left again. Each pass
+  swings a little narrower and a little darker, until the last repeats sit quietly in the middle, like a released
+  pendulum. The picture's right half shows the repeats going down in time.
+
+| Knob | | |
+| --- | --- | --- |
+| 1 | **REVERB** | How much room |
+| 2 | **BLOOM** | How much the room opens as they meet (0: a steady room) |
+| 3 | **ECHO** | How loud the echo |
+| 4 | **TIME** | The echo's time on the tempo: 1/32, 1/16, dotted 1/16, 1/8, dotted 1/8, 1/4, dotted 1/4 |
 
 ## GLO
 

@@ -12,7 +12,7 @@
  *   THE ARP            held keys replace the row: the pendulums play your chord
  *
  * The files: plumb.h (the pendulums, the engines, the ENV, the LFO; the audio interrupt), scale.h (48 scales),
- * effects.h (echo, reverb, chorus in parallel), this file (the keys, the presets, the pages). platform.c and the
+ * effects.h (the SWING ECHO and the reverb that BLOOMs, in parallel), this file (the keys, the presets, the pages). platform.c and the
  * kit_*.h are Dinghy's. */
 #include <stdint.h>
 #define APP_NAME "PLUMB"
@@ -210,24 +210,24 @@ static void live_panic(void)
 static const char *const factory_names[FACTORY] = {
     "PLUMB LINE", "MUSIC BOX", "FOUCAULT", "TIDE CLOCK", "LEAD LINE", "SHIP'S BELL", "SLACK WATER", "SEXTANT"
 };
-/*  eng          k1  k2 spark width  A   D   S   R   lfo target, wave, rate, depth  rev echo time cho
+/*  eng          k1  k2 spark width  A   D   S   R   lfo target, wave, rate, depth  rev echo time bloom
  *  cycle swings strike          grid count damp row        scale */
 static const patch_t factory[FACTORY] = {
-    {ENG_FOLD,   25, 50, 45, 70,   1, 18,  0, 20, LFO_TIMBRE, LW_SINE, 20, 20,     45, 20, 4, 0,
+    {ENG_FOLD,   25, 50, 45, 70,   1, 18,  0, 20, LFO_TIMBRE, LW_SINE, 20, 20,     45, 20, 4, 50,
      7, 3, STRIKE_MIDDLE, 0, 12, 0, ROW_RISE, 3, {0}},
-    {ENG_PULSAR, 30, 60, 50, 80,   1, 16,  0, 18, LFO_PITCH, LW_SINE, 40, 6,       35, 25, 3, 20,
+    {ENG_PULSAR, 30, 60, 50, 80,   1, 16,  0, 18, LFO_PITCH, LW_SINE, 40, 6,       35, 25, 3, 40,
      4, 8, STRIKE_WALLS, 3, 12, 0, ROW_ARCH, 1, {0}},
-    {ENG_PHASE,  20, SHAPE_SAW, 60, 60, 2, 21, 10, 22, LFO_GRAVITY, LW_SINE, 6, 40, 50, 15, 4, 10,
+    {ENG_PHASE,  20, SHAPE_SAW, 60, 60, 2, 21, 10, 22, LFO_GRAVITY, LW_SINE, 6, 40, 50, 15, 4, 60,
      7, 4, STRIKE_LEFT, 0, 10, 0, ROW_CHORD, 8, {0}},
-    {ENG_FOLD,   10, 70, 70, 90,   3, 22, 20, 24, LFO_TIMBRE, LW_DRIFT, 14, 30,    60, 30, 6, 30,
+    {ENG_FOLD,   10, 70, 70, 90,   3, 22, 20, 24, LFO_TIMBRE, LW_DRIFT, 14, 30,    60, 30, 6, 70,
      8, 3, STRIKE_ONE_WAY, 0, 12, 0, ROW_VALLEY, 19, {0}},
-    {ENG_PHASE,  35, SHAPE_PULSE, 40, 50, 0, 15, 0, 16, LFO_LEVEL, LW_TRIANGLE, 30, 15, 30, 35, 1, 0,
+    {ENG_PHASE,  35, SHAPE_PULSE, 40, 50, 0, 15, 0, 16, LFO_LEVEL, LW_TRIANGLE, 30, 15, 30, 35, 1, 30,
      4, 9, STRIKE_MIDDLE, 3, 12, 0, ROW_ZIGZAG, 4, {0}},
-    {ENG_PULSAR, 55, 30, 30, 60,   1, 24, 0, 26, LFO_TIMBRE, LW_SINE, 10, 35,      65, 20, 5, 0,
+    {ENG_PULSAR, 55, 30, 30, 60,   1, 24, 0, 26, LFO_TIMBRE, LW_SINE, 10, 35,      65, 20, 5, 60,
      6, 2, STRIKE_LEFT, 0, 8, 6, ROW_FIFTHS, 25, {0}},
-    {ENG_FOLD,   40, 30, 20, 100,  12, 20, 40, 27, LFO_GRAVITY, LW_DRIFT, 8, 60,   70, 10, 4, 40,
+    {ENG_FOLD,   40, 30, 20, 100,  12, 20, 40, 27, LFO_GRAVITY, LW_DRIFT, 8, 60,   70, 10, 4, 80,
      8, 1, STRIKE_MIDDLE, 0, 12, 0, ROW_RISE, 24, {0}},
-    {ENG_PHASE,  15, SHAPE_SQUARE, 70, 80, 1, 19, 0, 21, LFO_PITCH, LW_RANDOM, 36, 4, 40, 30, 2, 15,
+    {ENG_PHASE,  15, SHAPE_SQUARE, 70, 80, 1, 19, 0, 21, LFO_PITCH, LW_RANDOM, 36, 4, 40, 30, 2, 40,
      5, 5, STRIKE_WALLS, 5, 12, 0, ROW_SCATTER, 29, {0}},
 };
 static struct { uint32_t magic; patch_t user[USERS]; } store;
@@ -249,7 +249,7 @@ static int patch_ok(const patch_t *s)
     if (!(s->engine < ENGINES && s->k1 <= 100 && s->k2 <= 100 && s->spark <= 100 && s->width <= 100 &&
           s->attack < ENV_STEPS && s->decay < ENV_STEPS && s->sustain <= 100 && s->release < ENV_STEPS &&
           s->lfo_target < LFO_TARGETS && s->lfo_wave < LFO_WAVES && s->lfo_rate < LFO_RATES && s->lfo_depth <= 100 &&
-          s->reverb <= 100 && s->echo <= 100 && s->echo_time < ECHOS && s->chorus <= 100 &&
+          s->reverb <= 100 && s->echo <= 100 && s->echo_time < ECHOS && s->bloom <= 100 &&
           s->cycle < CYCLES && s->swings >= 1 && s->swings <= 24 && s->strike < STRIKES && s->grid < GRIDS &&
           s->count >= 1 && s->count <= PENDULUMS && s->damp < DAMPS && s->row < ROWS && s->scale < SCALE_COUNT))
         return 0;
@@ -782,25 +782,51 @@ static void draw_lfo_rows(void)
     ui_row(3, "DEPTH", v, C_BOB);
 }
 
-/* --- FX: a strike, its echoes, the room after it */
+/* BLOOM: how near the pendulums are to meeting, 0 .. 256 (256 at the meeting, 0 from a quarter cycle away) */
+static int32_t bloom_near(uint32_t c32)
+{
+    uint32_t d = (c32 < 0x80000000u ? c32 : 0u - c32) >> 16;   /* 0 .. 32768: half a cycle */
+    if (d >= 16384u) return 0;
+    int32_t b = (int32_t)(16384u - d) / 64;     /* 0 .. 256 */
+    return b * b >> 8;                          /* (eased in) */
+}
+
+/* --- FX: on the left the ROOM over one cycle (it opens as they meet, the dot is now); on the right the SWING ECHO,
+ * its repeats going down in time, left, right, left, narrower and fainter until they rest in the middle */
 static void draw_fx_pic(void)
 {
     cv_begin(UI_WIDTH, PIC_H, C_BG);
-    cv_rect(0, 56, UI_WIDTH, 1, C_RULE);
-    int32_t tail = 20 + pat.reverb * 19 / 10;  /* px */
-    for (int32_t x = 0; x < tail && x < (int32_t)UI_WIDTH - 6; x++) {
-        int32_t h = (int32_t)pat.reverb * 30 / 100 * (tail - x) / tail;
-        if (h > 0) cv_rect(6 + x, 56 - h, 1, h, C_GRAPH);
+    const int32_t RW = 96, base = 46;
+    cv_rect(0, base + 1, RW, 1, C_RULE);
+    int32_t prev = 0, rest = 8 + pat.reverb * 14 / 100;
+    for (int32_t x = 0; x < RW; x++) {
+        uint32_t c = (uint32_t)x * (0xFFFFFFFFu / (uint32_t)RW);
+        int32_t h = pat.reverb ? rest + bloom_near(c) * (int32_t)pat.bloom * 22 / (256 * 100) : 0;
+        cv_rect(x, base - h, 1, h, C_GRAPH);
+        if (x && pat.reverb) cv_line(x - 1, base - prev, x, base - h, C_TIME);
+        prev = h;
     }
-    cv_rect(6, 6, 2, 50, C_KEY);
-    int32_t step = 6 + (int32_t)echo_clocks[pat.echo_time] * 2, level = pat.echo * 48 / 100;
-    for (int32_t x = 6 + step; x < (int32_t)UI_WIDTH && level > 1; x += step) {
-        cv_rect(x, 56 - level, 2, level, C_BOB);
+    if (pat.reverb && clk_run && pd_running) {
+        int32_t x = (int32_t)(((uint64_t)pd_c32 * (uint32_t)RW) >> 32);
+        int32_t h = rest + bloom_near(pd_c32) * (int32_t)pat.bloom * 22 / (256 * 100);
+        cv_disc(x, base - h, 3, C_KEY);
+    }
+    cv_text(0, 48, &UI_SMALL, "ROOM", C_OFF, C_BG);
+    /* the echo */
+    const int32_t cx = 160;
+    for (int32_t y = 0; y < 46; y += 3) cv_pset(cx, y, C_GRAPH);
+    cv_disc(cx - 40, 3, 3, C_KEY);               /* the strike goes in on the left */
+    int32_t w = 40 * 32768, level = pat.echo * 32768 / 100, px = cx - 40, py = 3;
+    int32_t step = 4 + (int32_t)echo_clocks[pat.echo_time] / 3;
+    for (int32_t i = 1; level > 1500 && 3 + i * step < 46; i++) {
+        int32_t x = cx + ((i & 1) ? -1 : 1) * (w >> 15), y = 3 + i * step;
+        cv_line(px, py, x, y, C_TIME_DIM);
+        cv_disc(x, y, level > 16000 ? 3 : 2, level > 9000 ? C_BOB : C_BOB_DIM);
+        px = x; py = y;
+        w = w / 32768 * (32768 - 2 * 4096);     /* narrower each pass (ECHO_BLEED, both ways) */
         level = level * 55 / 100;
     }
-    if (pat.chorus)
-        for (int32_t x = 0; x < (int32_t)UI_WIDTH; x += 2)
-            cv_pset(x, 3 + sinq((uint32_t)x << 26) * (int32_t)pat.chorus / 100 * 2 / 32768, C_TIME_DIM);
+    cv_text(RW + 18, 48, &UI_SMALL, "ECHO", C_OFF, C_BG);
     cv_blit(UI_LEFT, PIC_Y);
 }
 
@@ -809,11 +835,11 @@ static void draw_fx_rows(void)
     char v[12];
     fmt(v, pat.reverb, "%");
     ui_row(0, "REVERB", v, C_BOB);
+    fmt(v, pat.bloom, "%");
+    ui_row(1, "BLOOM", v, C_TIME);
     fmt(v, pat.echo, "%");
-    ui_row(1, "ECHO", v, C_BOB);
-    ui_row(2, "TIME", echo_names[pat.echo_time], C_TIME);
-    fmt(v, pat.chorus, "%");
-    ui_row(3, "CHORUS", v, C_BOB);
+    ui_row(2, "ECHO", v, C_BOB);
+    ui_row(3, "TIME", echo_names[pat.echo_time], C_TIME);
 }
 
 /* --- GLO: the scale, on a piano octave (the root in blue) */
@@ -908,9 +934,9 @@ static void edit_page(uint8_t page, const int32_t s[4])
         break;
     case P_FX:
         pat.reverb = pct(pat.reverb, s[0]);
-        pat.echo = pct(pat.echo, s[1]);
-        pat.echo_time = (uint8_t)step_clamp(pat.echo_time, s[2], 0, ECHOS - 1);
-        pat.chorus = pct(pat.chorus, s[3]);
+        pat.bloom = pct(pat.bloom, s[1]);
+        pat.echo = pct(pat.echo, s[2]);
+        pat.echo_time = (uint8_t)step_clamp(pat.echo_time, s[3], 0, ECHOS - 1);
         break;
     default:
         if (s[0]) { scale_select((uint8_t)step_clamp(scale_now.scale, s[0], 0, SCALE_COUNT - 1)); pat.scale = scale_now.scale; }
@@ -927,12 +953,19 @@ static void update_fx(void)
     uint32_t bpm = (clock_bpm10() + 5u) / 10u;
     if (bpm < 30u) bpm = 30u;
     if (bpm > 300u) bpm = 300u;
-    uint32_t state = bpm | (uint32_t)pat.echo << 9 | (uint32_t)pat.reverb << 16 | (uint32_t)pat.echo_time << 23 | (uint32_t)pat.chorus << 26;
-    chorus_amount = pat.chorus / 2u;
+    /* BLOOM: the room is a little smaller and darker while they are scattered, and opens (longer, brighter, a
+     * little louder) as they come back into a line */
+    int32_t b = clk_run && pd_running ? bloom_near(pd_c32) * (int32_t)pat.bloom / 100 : 0;   /* 0 .. 256 */
+    int32_t calm = clk_run && pd_running ? (int32_t)pat.bloom * 12 / 100 : 0;
+    uint32_t decay = (uint32_t)(84 - calm + b * (30 + 12) / 256);     /* at most 114 (the hall stays stable < 117) */
+    uint32_t damping = (uint32_t)(40 - b * 26 / 256);
+    uint32_t mix = (uint32_t)pat.reverb + (uint32_t)(pat.reverb * b * 3 / (256 * 10));
+    uint32_t state = bpm | (uint32_t)pat.echo << 9 | (uint32_t)pat.echo_time << 16 | decay << 19 | (damping & 63u) << 26;
+    state ^= mix * 0x9e3779b9u;
     if (state == previous) return;
     previous = state;
-    delay_configure(pat.echo != 0, delay_tempo_samples(bpm, echo_clocks[pat.echo_time]), 55, pat.echo);
-    hall_configure(pat.reverb != 0, 84, 40, pat.reverb);
+    echo_configure(pat.echo != 0, echo_tempo_samples(bpm, echo_clocks[pat.echo_time]), 62, pat.echo);
+    hall_configure(pat.reverb != 0, (uint8_t)decay, (uint8_t)damping, (uint8_t)mix);
 }
 
 static uint8_t button_page(uint32_t button)
@@ -1005,7 +1038,7 @@ static void draw_footer(uint8_t page)
         ui_footer(pat.lfo_target == LFO_GRAVITY ? "GRAVITY BENDS THEIR TIME" :
                   pat.lfo_target == LFO_SPARK ? "SPARK: HOW EACH STRIKE OPENS" : "ONE LFO FOR ALL TWELVE", C_OFF);
         break;
-    case P_FX: ui_footer("IN PARALLEL", C_OFF); break;
+    case P_FX: ui_footer("THE ROOM OPENS AS THEY MEET", C_OFF); break;
     default:
         p = put_str(b, "KEYS: TRANSPOSE   ROOT ");
         put_str(p, note_names[scale_root_pc()]);
@@ -1036,7 +1069,7 @@ static uint32_t page_state(uint8_t page, uint32_t now)
         for (uint32_t i = 0; i < held_n; i++) MIX(held[i]);
         MIX(scale_now.octave); MIX(scale_now.scale); MIX(scale_now.transpose);
         break;
-    case P_FX: MIX(pat.reverb); MIX(pat.echo); MIX(pat.echo_time); MIX(pat.chorus); break;
+    case P_FX: MIX(pat.reverb); MIX(pat.echo); MIX(pat.echo_time); MIX(pat.bloom); MIX(clk_run); MIX(pd_running); MIX(pd_c32 >> 26); break;
     default: MIX(scale_now.scale); MIX(scale_now.transpose); break;
     }
     return h;
@@ -1052,7 +1085,7 @@ static uint32_t row_state(uint8_t page)
     case P_ENV: MIX(pat.attack); MIX(pat.decay); MIX(pat.sustain); MIX(pat.release); break;
     case P_LFO: MIX(pat.lfo_target); MIX(pat.lfo_wave); MIX(pat.lfo_rate); MIX(pat.lfo_depth); MIX(pat.engine); break;
     case P_ARP: MIX(arp.pattern); MIX(arp.range); MIX(arp.chance); MIX(arp.latch); break;
-    case P_FX: MIX(pat.reverb); MIX(pat.echo); MIX(pat.echo_time); MIX(pat.chorus); break;
+    case P_FX: MIX(pat.reverb); MIX(pat.echo); MIX(pat.echo_time); MIX(pat.bloom); break;
     default: MIX(scale_now.scale); MIX(set.tempo); MIX(set.sync_int); MIX(set.ch); MIX(clock_bpm10()); MIX(clk_ext()); break;
     }
     return h;

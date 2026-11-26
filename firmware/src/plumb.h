@@ -53,7 +53,7 @@ typedef struct {
     uint8_t engine, k1, k2, spark, width;       /* EDIT (k1, k2: the engine's own two) */
     uint8_t attack, decay, sustain, release;    /* ENV: indexes into env_ms[]; sustain % */
     uint8_t lfo_target, lfo_wave, lfo_rate, lfo_depth;
-    uint8_t reverb, echo, echo_time, chorus;    /* FX */
+    uint8_t reverb, echo, echo_time, bloom;     /* FX (bloom: how much the room opens as they meet) */
     uint8_t cycle, swings, strike, grid;        /* SEQ: the pendulums' rhythm */
     uint8_t count, damp, row, scale;            /* HOME: how many swing, how fast they tire, the row; the scale */
     int8_t notes[PENDULUMS];                    /* the row: a scale step each */

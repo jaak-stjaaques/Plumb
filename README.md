@@ -1,7 +1,7 @@
 # PLUMB
 
 <p align="center">
-  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.3">
+  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.4">
   <img src="docs/screenshots/home.png" width="320" alt="HOME page: twelve bobs seen from above, swinging across their lanes in a snake, one striking the blue line">
 </p>
 <p align="center">
@@ -35,6 +35,8 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
   RANDOM, or SPREAD: pendulum *k* plays note *k*), with RANGE, CHANCE and LATCH.
 - **The LFO** moves PITCH, FOLDS (DCW, FORMANT), SPARK or LEVEL, or **bends time**: its GRAVITY target pulls the
   pendulums ahead and holds them back, and they still meet.
+- **Effects with the pendulums' character**: the reverb **BLOOMs** as the pendulums meet (every cycle ends in a
+  swell), and the **SWING ECHO** bounces left, right, left, narrower each time, until it comes to rest in the middle.
 - **48 scales**, common and exotic. On the GLO page the keys transpose everything.
 - **The cycle line is on every page**: the beat of the cycle, and when they meet again.
 - **Dinghy inside**: MIDI clock sync (a DAW's START releases the pendulums on its downbeat), MIDI in and out (every
@@ -44,7 +46,7 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
 
 [Read the operator manual](docs/OPERATOR-MANUAL.md) · [Credits and licenses](LICENSING.md) · [Changelog](CHANGELOG.md)
 
-**Version 0.3** builds as `plumb.fwsc` (a tagged release: `plumb-0.3.fwsc`). The host tests pass. It has **not yet
+**Version 0.4** builds as `plumb.fwsc` (a tagged release: `plumb-0.4.fwsc`). The host tests pass. It has **not yet
 been installed on a physical FM‑1**.
 
 ## Build
@@ -58,7 +60,7 @@ Every push to `main` builds the package on GitHub and leaves it on the `build` b
 
 PLUMB is written on [Dinghy](https://github.com/zvenson/dinghy) by zvenson (its platform, MIDI clock sync, MIDI,
 mirror and backup kit), which carries the [Felucca](https://github.com/hugelton/Felucca) and
-[SLOOP](https://github.com/isod89/sloop-fm1) platform work. The delay, hall, chorus, the scales and the look of the
+[SLOOP](https://github.com/isod89/sloop-fm1) platform work. The hall (which PLUMB makes bloom), the 12-bit effect clock under the swing echo, the scales and the look of the
 pages come from [LOOPHEADS](https://github.com/jaak-stjaaques/LOOPHEADS-public),
 [BEACHCOMBER](https://github.com/jaak-stjaaques/Beachcomber) and [BUOY](https://github.com/jaak-stjaaques/BUOY). The
 screen font is [IBM Plex Mono](https://github.com/IBM/plex). The pendulum wave is an old physics classroom demonstration;
