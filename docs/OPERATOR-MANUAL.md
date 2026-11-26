@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.5 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.6 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -144,7 +144,7 @@ play holds as long as you hold it.
 The reverb and the echo, side by side (in parallel: neither feeds the other).
 
 - **The room BLOOMs.** While the pendulums are scattered the reverb is small, dark and quiet; as they come back into a
-  line it opens wide: a long, bright tail, up to almost twice as loud. Every cycle ends in a swell. The picture's left
+  line it opens wide: a long, bright tail, up to 1.4 times as loud. Every cycle ends in a swell. The picture's left
   half is the room over one cycle; the dot is now.
 - **The echo** repeats each strike on the tempo, each repeat quieter (right half of the picture).
 

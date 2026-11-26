@@ -64,7 +64,19 @@ static void app_audio(int32_t *out, uint32_t frames)
     plumb_render(out, frames);
     effects_process(out, frames);
     int32_t vol = midi_vol_q15();
-    for (uint32_t i = 0; i < 2u * frames; i++) out[i] = (output_level(out[i]) * vol) >> 15;
+    /* The leveller: when the sum (a loud PHASE and a blooming room, say) would go past 20000, the whole sound is
+     * turned down at once, and back up over ~0.1 s: louder moments get quieter instead of distorted. The soft
+     * ceiling after it is only a safety net. */
+    static int32_t lev = Q15;
+    for (uint32_t i = 0; i < frames; i++) {
+        int32_t l = out[2u * i], r = out[2u * i + 1u];
+        int32_t m = l < 0 ? -l : l, mr = r < 0 ? -r : r;
+        if (mr > m) m = mr;
+        if (m > 0 && ((int64_t)m * lev >> 15) > 19800) lev = (int32_t)(19800u * 32768u / (uint32_t)m);
+        out[2u * i] = (output_level((int32_t)(((int64_t)l * lev) >> 15)) * vol) >> 15;
+        out[2u * i + 1u] = (output_level((int32_t)(((int64_t)r * lev) >> 15)) * vol) >> 15;
+        lev += (Q15 - lev) >> 12;
+    }
 #ifndef DINGHY_HOST
     /* A safety net (as BUOY): the sound has 5.8 ms a block. If it ever takes more than 3.8 ms, new strikes get only
      * five voices until it has been calm for 2 s: a little less sound instead of crackles. */
@@ -954,8 +966,8 @@ static void update_fx(void)
     uint32_t decay = (uint32_t)(84 - calm + b * (30 + 30) / 256);     /* at most 114 (the hall stays stable < 117) */
     uint32_t damping = (uint32_t)(40 + calm / 2 - b * (34 + 15) / 256);   /* darker scattered, bright at the meeting */
     uint32_t dry_part = (uint32_t)(100 - (int32_t)pat.bloom * 35 / 100);   /* scattered: a smaller send */
-    uint32_t mix = (uint32_t)pat.reverb * (dry_part * 256u + (uint32_t)b * (190u - dry_part)) / 25600u;   /* at the meeting
-                                                 * up to 1.9 x the REVERB knob */
+    uint32_t mix = (uint32_t)pat.reverb * (dry_part * 256u + (uint32_t)b * (140u - dry_part)) / 25600u;   /* at the meeting
+                                                 * up to 1.4 x the REVERB knob (more distorts) */
     uint32_t state = bpm | (uint32_t)pat.echo << 9 | (uint32_t)pat.echo_time << 16 | decay << 19 | (damping & 63u) << 26;
     state ^= mix * 0x9e3779b9u;
     if (state == previous) return;
