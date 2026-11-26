@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5 – 2026-11-25
+
+- **A stronger BLOOM**: while the pendulums are scattered the room is smaller, darker and quieter than before; as they
+  meet it opens wider, brighter and up to 1.9 x as loud. The contrast is what you hear.
+- **The echo is back to the one before 0.4** (the swing echo made the pendulums' pattern too busy to follow).
+
 ## 0.4 – 2026-11-25
 
 Effects with the pendulums' character, for the same memory and CPU as before.

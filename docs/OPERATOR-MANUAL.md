@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.4 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.5 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -139,16 +139,14 @@ play holds as long as you hold it.
 
 ## FX
 
-<p align="center"><img src="screenshots/fx.png" width="320" alt="FX: on the left the room over one cycle, larger at both ends where the pendulums meet, a dot at now; on the right the swing echo, its repeats zigzagging left and right and narrowing; the knobs REVERB, BLOOM, ECHO, TIME"></p>
+<p align="center"><img src="screenshots/fx.png" width="320" alt="FX: on the left the room over one cycle, larger at both ends where the pendulums meet, a dot at now; on the right a strike and its echoes; the knobs REVERB, BLOOM, ECHO, TIME"></p>
 
-Two effects with the pendulums' character, side by side (in parallel: neither feeds the other).
+The reverb and the echo, side by side (in parallel: neither feeds the other).
 
-- **The room BLOOMs.** The reverb is a little smaller and darker while the pendulums are scattered, and opens (a
-  longer, brighter, slightly louder tail) as they come back into a line. Every cycle ends in a swell. The picture's
-  left half is the room over one cycle; the dot is now.
-- **The SWING ECHO comes to rest.** The first repeat is on the left, the next on the right, then left again. Each pass
-  swings a little narrower and a little darker, until the last repeats sit quietly in the middle, like a released
-  pendulum. The picture's right half shows the repeats going down in time.
+- **The room BLOOMs.** While the pendulums are scattered the reverb is small, dark and quiet; as they come back into a
+  line it opens wide: a long, bright tail, up to almost twice as loud. Every cycle ends in a swell. The picture's left
+  half is the room over one cycle; the dot is now.
+- **The echo** repeats each strike on the tempo, each repeat quieter (right half of the picture).
 
 | Knob | | |
 | --- | --- | --- |

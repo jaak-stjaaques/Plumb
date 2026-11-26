@@ -12,7 +12,7 @@
  *   THE ARP            held keys replace the row: the pendulums play your chord
  *
  * The files: plumb.h (the pendulums, the engines, the ENV, the LFO; the audio interrupt), scale.h (48 scales),
- * effects.h (the SWING ECHO and the reverb that BLOOMs, in parallel), this file (the keys, the presets, the pages). platform.c and the
+ * effects.h (the echo and the reverb that BLOOMs, in parallel), this file (the keys, the presets, the pages). platform.c and the
  * kit_*.h are Dinghy's. */
 #include <stdint.h>
 #define APP_NAME "PLUMB"
@@ -791,41 +791,35 @@ static int32_t bloom_near(uint32_t c32)
     return b * b >> 8;                          /* (eased in) */
 }
 
-/* --- FX: on the left the ROOM over one cycle (it opens as they meet, the dot is now); on the right the SWING ECHO,
- * its repeats going down in time, left, right, left, narrower and fainter until they rest in the middle */
+/* --- FX: on the left the ROOM over one cycle (it opens as they meet, the dot is now); on the right the ECHO */
 static void draw_fx_pic(void)
 {
     cv_begin(UI_WIDTH, PIC_H, C_BG);
     const int32_t RW = 96, base = 46;
     cv_rect(0, base + 1, RW, 1, C_RULE);
-    int32_t prev = 0, rest = 8 + pat.reverb * 14 / 100;
+    int32_t prev = 0, rest = (6 + pat.reverb * 12 / 100) * (100 - (int32_t)pat.bloom * 35 / 100) / 100;
     for (int32_t x = 0; x < RW; x++) {
         uint32_t c = (uint32_t)x * (0xFFFFFFFFu / (uint32_t)RW);
-        int32_t h = pat.reverb ? rest + bloom_near(c) * (int32_t)pat.bloom * 22 / (256 * 100) : 0;
+        int32_t h = pat.reverb ? rest + bloom_near(c) * (int32_t)pat.bloom * 26 / (256 * 100) : 0;
         cv_rect(x, base - h, 1, h, C_GRAPH);
         if (x && pat.reverb) cv_line(x - 1, base - prev, x, base - h, C_TIME);
         prev = h;
     }
     if (pat.reverb && clk_run && pd_running) {
         int32_t x = (int32_t)(((uint64_t)pd_c32 * (uint32_t)RW) >> 32);
-        int32_t h = rest + bloom_near(pd_c32) * (int32_t)pat.bloom * 22 / (256 * 100);
+        int32_t h = rest + bloom_near(pd_c32) * (int32_t)pat.bloom * 26 / (256 * 100);
         cv_disc(x, base - h, 3, C_KEY);
     }
     cv_text(0, 48, &UI_SMALL, "ROOM", C_OFF, C_BG);
-    /* the echo */
-    const int32_t cx = 160;
-    for (int32_t y = 0; y < 46; y += 3) cv_pset(cx, y, C_GRAPH);
-    cv_disc(cx - 40, 3, 3, C_KEY);               /* the strike goes in on the left */
-    int32_t w = 40 * 32768, level = pat.echo * 32768 / 100, px = cx - 40, py = 3;
-    int32_t step = 4 + (int32_t)echo_clocks[pat.echo_time] / 3;
-    for (int32_t i = 1; level > 1500 && 3 + i * step < 46; i++) {
-        int32_t x = cx + ((i & 1) ? -1 : 1) * (w >> 15), y = 3 + i * step;
-        cv_line(px, py, x, y, C_TIME_DIM);
-        cv_disc(x, y, level > 16000 ? 3 : 2, level > 9000 ? C_BOB : C_BOB_DIM);
-        px = x; py = y;
-        w = w / 32768 * (32768 - 2 * 4096);     /* narrower each pass (ECHO_BLEED, both ways) */
+    /* the echo: a strike, then its repeats, each quieter */
+    const int32_t ex = RW + 18;
+    cv_rect(ex, 46 - 40, 2, 40, C_KEY);
+    int32_t step = 6 + (int32_t)echo_clocks[pat.echo_time] * 2, level = pat.echo * 40 / 100;
+    for (int32_t x = ex + step; x < (int32_t)UI_WIDTH - 2 && level > 1; x += step) {
+        cv_rect(x, 46 - level, 2, level, C_BOB);
         level = level * 55 / 100;
     }
+    cv_rect(ex, base + 1, (int32_t)UI_WIDTH - ex, 1, C_RULE);
     cv_text(RW + 18, 48, &UI_SMALL, "ECHO", C_OFF, C_BG);
     cv_blit(UI_LEFT, PIC_Y);
 }
@@ -956,15 +950,17 @@ static void update_fx(void)
     /* BLOOM: the room is a little smaller and darker while they are scattered, and opens (longer, brighter, a
      * little louder) as they come back into a line */
     int32_t b = clk_run && pd_running ? bloom_near(pd_c32) * (int32_t)pat.bloom / 100 : 0;   /* 0 .. 256 */
-    int32_t calm = clk_run && pd_running ? (int32_t)pat.bloom * 12 / 100 : 0;
-    uint32_t decay = (uint32_t)(84 - calm + b * (30 + 12) / 256);     /* at most 114 (the hall stays stable < 117) */
-    uint32_t damping = (uint32_t)(40 - b * 26 / 256);
-    uint32_t mix = (uint32_t)pat.reverb + (uint32_t)(pat.reverb * b * 3 / (256 * 10));
+    int32_t calm = clk_run && pd_running ? (int32_t)pat.bloom * 30 / 100 : 0;
+    uint32_t decay = (uint32_t)(84 - calm + b * (30 + 30) / 256);     /* at most 114 (the hall stays stable < 117) */
+    uint32_t damping = (uint32_t)(40 + calm / 2 - b * (34 + 15) / 256);   /* darker scattered, bright at the meeting */
+    uint32_t dry_part = (uint32_t)(100 - (int32_t)pat.bloom * 35 / 100);   /* scattered: a smaller send */
+    uint32_t mix = (uint32_t)pat.reverb * (dry_part * 256u + (uint32_t)b * (190u - dry_part)) / 25600u;   /* at the meeting
+                                                 * up to 1.9 x the REVERB knob */
     uint32_t state = bpm | (uint32_t)pat.echo << 9 | (uint32_t)pat.echo_time << 16 | decay << 19 | (damping & 63u) << 26;
     state ^= mix * 0x9e3779b9u;
     if (state == previous) return;
     previous = state;
-    echo_configure(pat.echo != 0, echo_tempo_samples(bpm, echo_clocks[pat.echo_time]), 62, pat.echo);
+    delay_configure(pat.echo != 0, delay_tempo_samples(bpm, echo_clocks[pat.echo_time]), 55, pat.echo);
     hall_configure(pat.reverb != 0, (uint8_t)decay, (uint8_t)damping, (uint8_t)mix);
 }
 

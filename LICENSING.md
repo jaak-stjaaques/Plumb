@@ -8,9 +8,9 @@ complete source under the same licence too.
 
 - The app (`firmware/src/dinghy.c`), the pendulums and the three engines (`firmware/src/plumb.h`), `tools/gen_tables.py`,
   `tools/gen_boot_logo.py`, the docs and the screens: jaak-stjaaques, written with Claude (Anthropic).
-- PLUMB's own effects: the swing echo (`echo.h`, built on LOOPHEADS' 12-bit delay) and the bloom (in `dinghy.c`).
-- From the same author's **LOOPHEADS**, **BEACHCOMBER** and **BUOY**: the hall (`hall.h`), the 12-bit effect clock
-  (`fx12.h`), the scales (`scale.h`), the IBM Plex Mono screen font (`ui_font.h`,
+- PLUMB's own: the bloom of the reverb (in `dinghy.c`).
+- From the same author's **LOOPHEADS**, **BEACHCOMBER** and **BUOY**: the delay and the hall (`delay.h`, `hall.h`,
+  `fx12.h`), the scales (`scale.h`), the IBM Plex Mono screen font (`ui_font.h`,
   `tools/gen_ui_font.py`), the text drawing over a colour in `gfx.c`, and the look of the pages.
 - The ideas it plays with belong to everyone: the pendulum wave (a physics classroom demonstration), the wavefolder and
   low-pass gate of West Coast synthesis, Casio's phase distortion, Curtis Roads' pulsar synthesis.
