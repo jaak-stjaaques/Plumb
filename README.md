@@ -1,7 +1,7 @@
 # PLUMB
 
 <p align="center">
-  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.6">
+  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.5">
   <img src="docs/screenshots/home.png" width="320" alt="HOME page: twelve bobs seen from above, swinging across their lanes in a snake, one striking the blue line">
 </p>
 <p align="center">
@@ -46,7 +46,7 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
 
 [Read the operator manual](docs/OPERATOR-MANUAL.md) · [Credits and licenses](LICENSING.md) · [Changelog](CHANGELOG.md)
 
-**Version 0.6** builds as `plumb.fwsc` (a tagged release: `plumb-0.6.fwsc`). The host tests pass. It has **not yet
+**Version 0.5** builds as `plumb.fwsc` (a tagged release: `plumb-0.5.fwsc`). The host tests pass. It has **not yet
 been installed on a physical FM‑1**.
 
 ## Build

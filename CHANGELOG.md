@@ -1,12 +1,5 @@
 # Changelog
 
-## 0.6 – 2026-11-25
-
-- **No more distortion at REVERB 100 % and BLOOM 100 %** (heard with PHASE). The reverb now gets half as hot a
-  signal and gives it back twice as loud: its 12-bit room never clips, even fully blooming. At the meeting it swells
-  to 1.4 x the REVERB knob (1.9 x was too much). And a leveller at the output turns the whole sound down for a moment
-  when it would go past the soft ceiling, instead of bending the waveform.
-
 ## 0.5 – 2026-11-25
 
 - **A stronger BLOOM**: while the pendulums are scattered the room is smaller, darker and quieter than before; as they
