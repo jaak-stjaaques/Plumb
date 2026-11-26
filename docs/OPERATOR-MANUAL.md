@@ -4,6 +4,8 @@ PLUMB 0.3 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three osc
 
 ## The idea in one minute
 
+<p align="center"><img src="screenshots/boot.png" width="320" alt="The boot screen: twelve brass plumb bobs on lines of falling length, caught mid-swing, and the version"></p>
+
 Twelve pendulums hang in a row. When they are released together, pendulum 1 swings `SWINGS` times in one cycle,
 pendulum 2 `SWINGS + 1` times, pendulum 12 `SWINGS + 11` times. Because every one of them makes a whole number of
 swings in the cycle, they drift apart, form waves, rows and chaos, and are **all back in a line at the end of the
@@ -54,6 +56,8 @@ The keys light up when a pendulum strikes their note.
 
 ## HOME: the row
 
+<p align="center"><img src="screenshots/home.png" width="320" alt="HOME: the twelve bobs seen from above in a snake across their lanes, pendulum 1 framed, the knobs NOTE, ROW, PENDULUMS, DAMP"></p>
+
 The picture shows the row from above: each bob swings across its lane, the blue line is where it strikes, the thin
 line through the bobs is the wave. A struck bob flashes; a caught one is an empty circle. The picked one is framed
 (red while REC is on).
@@ -67,6 +71,8 @@ line through the bobs is the wave. A struck bob flashes; a caught one is an empt
 
 ## SEQ: the swing
 
+<p align="center"><img src="screenshots/seq.png" width="320" alt="SEQ: the whole cycle, a lane a pendulum and a mark at each strike, the blue line at now; the knobs CYCLE, SWINGS, STRIKE, GRID"></p>
+
 The picture is the whole cycle at once: a lane for each pendulum, a mark for each strike, the blue line is now. Where
 many marks line up in a column, the pendulums meet.
 
@@ -79,6 +85,8 @@ many marks line up in a column, the pendulums meet.
 
 ## ARP: the pendulums play your keys
 
+<p align="center"><img src="screenshots/arp.png" width="320" alt="ARP ON: the notes the pendulums played from the keys held (E3 A3 C4 E4); the knobs PATTERN, RANGE, CHANCE, LATCH"></p>
+
 With the ARP on, hold a chord: every strike takes its note from the keys you hold instead of the row. Let go and they
 play the row again.
 
@@ -90,6 +98,13 @@ play the row again.
 | 4 | **LATCH** | ON: the chord stays when you let go; the next chord replaces it |
 
 ## EDIT: the bobs
+
+<p align="center">
+  <img src="screenshots/edit.png" width="240" alt="EDIT FOLD: a folded sine at rest and brighter at the strike; FOLDS, SYMMETRY, SPARK, WIDTH">
+  <img src="screenshots/edit-phase.png" width="240" alt="EDIT PHASE: a cosine bent toward a saw; DCW, SHAPE, SPARK, WIDTH">
+  <img src="screenshots/edit-pulsar.png" width="240" alt="EDIT PULSAR: one grain of sine in each cycle; FORMANT, DUTY, SPARK, WIDTH">
+</p>
+<p align="center"><sub>FOLD · PHASE · PULSAR</sub></p>
 
 ALGORITHM chooses what a strike sounds like. The picture is one cycle of the wave: dim at rest, bright at the strike.
 
@@ -106,10 +121,14 @@ ALGORITHM chooses what a strike sounds like. The picture is one cycle of the wav
 
 ## ENV: every strike
 
+<p align="center"><img src="screenshots/env.png" width="320" alt="ENV: the envelope of a strike; the knobs ATTACK, DECAY, SUSTAIN, RELEASE"></p>
+
 ATTACK, DECAY, SUSTAIN, RELEASE. A strike holds for half the time to that bob's next strike, then RELEASE. A key you
 play holds as long as you hold it.
 
 ## LFO
+
+<p align="center"><img src="screenshots/lfo.png" width="320" alt="LFO: the wave and where it is now; the knobs TARGET (here SPARK), WAVE, RATE, DEPTH"></p>
 
 | Knob | | |
 | --- | --- | --- |
@@ -120,9 +139,13 @@ play holds as long as you hold it.
 
 ## FX
 
+<p align="center"><img src="screenshots/fx.png" width="320" alt="FX: a strike, its echoes and the reverb's tail; the knobs REVERB, ECHO, TIME, CHORUS"></p>
+
 REVERB, ECHO, TIME (the echo, 1/32 to a dotted 1/4, on the tempo) and CHORUS, in parallel.
 
 ## GLO
+
+<p align="center"><img src="screenshots/glo.png" width="320" alt="GLO SCALE: MAJOR PENT on a piano octave, the root in blue; the knobs SCALE, TEMPO, SYNC, MIDI CH"></p>
 
 | Knob | | |
 | --- | --- | --- |

@@ -1,0 +1,8 @@
+# The EDIT screenshots of PHASE and PULSAR: tests/run_host.sh tests/scripts/engines.txt (4600 PHASE, 6300 PULSAR)
+2000 btn 12
+2100 btn 6
+3000 enc 1 1
+4600 shot
+4700 enc 1 1
+6300 shot
+6500 end
