@@ -454,7 +454,7 @@ static void draw_cycle_line(uint8_t time_page)
     int32_t wm = text_w(&UI_SMALL, meet);
     int32_t x0 = 62 > wl + 6 ? 62 : wl + 6, x1 = (int32_t)UI_WIDTH - wm - 8;
     cv_rect(x0, 8, x1 - x0, 1, C_RULE);
-    uint32_t every = beats > 32u ? 4u : beats > 16u ? 2u : 1u;
+    uint32_t every = beats > 64u ? 8u : beats > 32u ? 4u : beats > 16u ? 2u : 1u;
     for (uint32_t i = 0; i <= beats; i += every) cv_rect(x0 + (int32_t)i * (x1 - x0) / (int32_t)beats, 6, 1, 5, C_RULE);
     int32_t px = x0 + (int32_t)(((uint64_t)pd_c32 * (uint32_t)(x1 - x0)) >> 32);
     if (clk_run && running) {

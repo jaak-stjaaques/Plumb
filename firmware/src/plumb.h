@@ -39,7 +39,7 @@ static const char *const engine_k1_names[3] = {"FOLDS", "DCW", "FORMANT"};   /* 
 static const char *const lfo_wave_names[LFO_WAVES] = {"SINE", "TRIANGLE", "RANDOM", "DRIFT"};
 static const char *const row_names[ROWS] = {"RISE", "FALL", "ARCH", "VALLEY", "ZIGZAG", "CHORD", "FIFTHS", "SCATTER"};
 static const char *const pattern_names[PATTERNS] = {"UP", "DOWN", "BOUNCE", "RANDOM", "SPREAD"};
-static const uint8_t cycle_beats[] = {4, 6, 8, 12, 16, 24, 32, 48, 64};
+static const uint8_t cycle_beats[] = {4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128};   /* (presets keep an index: add at the end) */
 #define CYCLES (sizeof cycle_beats)
 static const uint8_t grid_ticks[] = {0, 3, 4, 6, 8, 12, 24};     /* 24 a quarter */
 static const char *const grid_names[] = {"FREE", "1/32", "1/16 T", "1/16", "1/8 T", "1/8", "1/4"};

@@ -1,7 +1,7 @@
 # PLUMB
 
 <p align="center">
-  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.2">
+  <img src="docs/screenshots/boot.png" width="320" alt="PLUMB boot screen: twelve brass plumb bobs hanging from a beam on lines of falling length, caught mid-swing in a wave, version 0.3">
   <img src="docs/screenshots/home.png" width="320" alt="HOME page: twelve bobs seen from above, swinging across their lanes in a snake, one striking the blue line">
 </p>
 <p align="center">
@@ -20,7 +20,7 @@ Pendulum *k* swings `SWINGS + k` times in one CYCLE, so they leave in a line, tu
 three, scatter into what looks like chaos, and **meet again, all in a line, at the end of the cycle**. Each time a bob
 passes its strike point it plays its note. Nothing is random; nothing repeats until the cycle does.
 
-- **The rhythm is physics (SEQ)**: CYCLE (4 to 64 beats), SWINGS (how fast the slowest one goes), STRIKE (the middle,
+- **The rhythm is physics (SEQ)**: CYCLE (4 to 128 beats), SWINGS (how fast the slowest one goes), STRIKE (the middle,
   one way, the left wall, both walls) and GRID (FREE, or the strikes snapped to 1/32 .. 1/4: a pendulum wave becomes
   twelve Euclidean rhythms).
 - **The row (HOME)**: a note for each pendulum, as a scale step. ROW shapes all twelve at once (RISE, FALL, ARCH,
@@ -44,7 +44,7 @@ passes its strike point it plays its note. Nothing is random; nothing repeats un
 
 [Read the operator manual](docs/OPERATOR-MANUAL.md) · [Credits and licenses](LICENSING.md) · [Changelog](CHANGELOG.md)
 
-**Version 0.2** builds as `plumb.fwsc` (a tagged release: `plumb-0.2.fwsc`). The host tests pass. It has **not yet
+**Version 0.3** builds as `plumb.fwsc` (a tagged release: `plumb-0.3.fwsc`). The host tests pass. It has **not yet
 been installed on a physical FM‑1**.
 
 ## Build

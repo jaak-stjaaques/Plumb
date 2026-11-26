@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3 – 2026-11-25
+
+- **CYCLE goes to 96 and 128 beats**: at 96 BPM, 128 beats is 80 seconds before they meet again. Saved presets keep
+  their cycles.
+
 ## 0.2 – 2026-11-25
 
 - **No more crackle.** A pendulum that strikes while all eight voices sound takes one over: that voice now fades out

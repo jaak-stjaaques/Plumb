@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.2 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.3 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -72,7 +72,7 @@ many marks line up in a column, the pendulums meet.
 
 | Knob | | |
 | --- | --- | --- |
-| 1 | **CYCLE** | 4, 6, 8, 12, 16, 24, 32, 48 or 64 beats until they meet again |
+| 1 | **CYCLE** | 4, 6, 8, 12, 16, 24, 32, 48, 64, 96 or 128 beats until they meet again |
 | 2 | **SWINGS** | The slowest pendulum's swings in a cycle (1..24); the others make one more each ("3 TO 14") |
 | 3 | **STRIKE** | Where a bob strikes. **MIDDLE**: passing the middle, both ways (twice a swing). **ONE WAY**: the middle, left to right only. **LEFT WALL**: at the left, once a swing; all twelve strike together on the downbeat. **BOTH WALLS**: at each side, twice a swing, panned to that side |
 | 4 | **GRID** | **FREE**: the strikes fall where physics puts them. **1/32 .. 1/4**: each strike waits for the next grid line, and the pendulum wave turns into twelve interlocking Euclidean rhythms |
