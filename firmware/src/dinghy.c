@@ -141,6 +141,7 @@ static void pendulums_retune(void)              /* the row through the scale: ev
 /* ------------------------------------------------------------------------------------------------- the ARP */
 static struct { uint8_t on, pattern, range, chance, latch; } arp = {0, PAT_UP, 1, 100, 0};
 static uint8_t held[16], held_n, latched;       /* the keys (and MIDI notes) held, in the order pressed */
+static uint8_t keys_down;                       /* how many keys and MIDI notes are down right now */
 static uint8_t arp_hist[16], arp_hist_n;        /* what the ARP played last (0..255 high; 0xFF rest), for the screen */
 
 static void arp_publish(void)                   /* the held notes, low to high, RANGE octaves of them -> the ISR */
@@ -175,7 +176,10 @@ static void live_note(uint32_t on, uint32_t note, uint32_t vel)
 {
     if (on) {
         if (arp.on && arp.latch && latched) { held_n = 0; latched = 0; }   /* a new chord after a latched one */
-        if (held_n < 16u) held[held_n++] = (uint8_t)note;
+        if (keys_down < 255u) keys_down++;
+        uint8_t dup = 0;
+        for (uint32_t i = 0; i < held_n; i++) dup |= held[i] == note;
+        if (!dup && held_n < 16u) held[held_n++] = (uint8_t)note;
         if (rec_on) {                           /* REC: into the row, then on to the next pendulum */
             pat.notes[picked] = (int8_t)clampi(scale_note_step((int32_t)note), -24, 40);
             uint32_t count = pat.count ? pat.count : 1u;
@@ -184,10 +188,12 @@ static void live_note(uint32_t on, uint32_t note, uint32_t vel)
         if (!arp.on || rec_on) cmd_put(1, (uint8_t)(note + 1u), scale_step_pitch(scale_note_step((int32_t)note)), (int32_t)vel * 258);
     } else {
         cmd_put(0, (uint8_t)(note + 1u), 0, 0);
-        if (arp.on && arp.latch) {              /* LATCH: the chord stays once every key is up */
-            uint32_t down = 0;
-            for (uint32_t k = 0; k < 27u; k++) down += fm1_in.notes >> k & 1u;
-            if (!down) { latched = 1; return; }
+        if (keys_down) keys_down--;
+        if (arp.on && arp.latch) {              /* LATCH: every note held stays, as the keys are let go one by
+                                                 * one; once all are up the chord is latched, and the next key
+                                                 * starts a new one */
+            if (!keys_down) latched = 1;
+            return;
         }
         uint32_t j = 0;
         for (uint32_t i = 0; i < held_n; i++) if (held[i] != note) held[j++] = held[i];
@@ -200,6 +206,7 @@ static void live_panic(void)
     for (uint32_t n = 0; n < 128u; n++) cmd_put(0, (uint8_t)(n + 1u), 0, 0);
     held_n = 0;
     latched = 0;
+    keys_down = 0;
 }
 
 /* ---------------------------------------------------------------------------------------------- presets

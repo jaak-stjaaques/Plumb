@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.3 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.4 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
@@ -95,7 +95,7 @@ play the row again.
 | 1 | **PATTERN** | UP, DOWN, BOUNCE, RANDOM, or **SPREAD**: pendulum 1 plays your lowest note, pendulum 2 the next, ... |
 | 2 | **RANGE** | 1 to 4 octaves |
 | 3 | **CHANCE** | How often a strike plays (the others are silent) |
-| 4 | **LATCH** | ON: the chord stays when you let go; the next chord replaces it |
+| 4 | **LATCH** | ON: every note you held keeps playing when you let go (all of them, even if you let go of the keys one by one). The next key you press starts a new chord, which replaces it |
 
 ## EDIT: the bobs
 

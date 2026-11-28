@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4 – 2026-11-27
+
+(An earlier 0.4, 0.5 and 0.6 tried a blooming reverb and a swing echo; they were taken back. This 0.4 is 0.3 plus:)
+
+- **LATCH keeps the whole chord.** With the ARP on and LATCH ON, every note held keeps playing when the keys are let
+  go, even one by one (before, only the last key let go stayed). Once every key is up, the next key starts a new
+  chord. MIDI notes count as keys.
+
 ## 0.3 – 2026-11-25
 
 - **CYCLE goes to 96 and 128 beats**: at 96 BPM, 128 beats is 80 seconds before they meet again. Saved presets keep
