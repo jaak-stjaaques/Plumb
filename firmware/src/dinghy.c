@@ -142,6 +142,9 @@ static void pendulums_retune(void)              /* the row through the scale: ev
 static struct { uint8_t on, pattern, range, chance, latch; } arp = {0, PAT_UP, 1, 100, 0};
 static uint8_t held[16], held_n, latched;       /* the keys (and MIDI notes) held, in the order pressed */
 static uint8_t keys_down;                       /* how many keys and MIDI notes are down right now */
+static uint32_t latched_at;                     /* when the chord was latched (ms) */
+#define LATCH_BOUNCE_MS 150u                    /* a key coming up can bounce: one of the chord's notes "pressed"
+                                                 * again this soon after the latch is that, not a new chord */
 static uint8_t arp_hist[16], arp_hist_n;        /* what the ARP played last (0..255 high; 0xFF rest), for the screen */
 
 static void arp_publish(void)                   /* the held notes, low to high, RANGE octaves of them -> the ISR */
@@ -175,8 +178,14 @@ static void say(const char *text) { message = text; message_at = fm1_ms; }
 static void live_note(uint32_t on, uint32_t note, uint32_t vel)
 {
     if (on) {
-        if (arp.on && arp.latch && latched) { held_n = 0; latched = 0; }   /* a new chord after a latched one */
         if (keys_down < 255u) keys_down++;
+        if (arp.on && arp.latch && latched) {
+            uint8_t in_chord = 0;
+            for (uint32_t i = 0; i < held_n; i++) in_chord |= held[i] == note;
+            if (in_chord && fm1_ms - latched_at < LATCH_BOUNCE_MS) return;   /* a bounce: the chord stays */
+            held_n = 0;                         /* a new chord after a latched one */
+            latched = 0;
+        }
         uint8_t dup = 0;
         for (uint32_t i = 0; i < held_n; i++) dup |= held[i] == note;
         if (!dup && held_n < 16u) held[held_n++] = (uint8_t)note;
@@ -192,7 +201,7 @@ static void live_note(uint32_t on, uint32_t note, uint32_t vel)
         if (arp.on && arp.latch) {              /* LATCH: every note held stays, as the keys are let go one by
                                                  * one; once all are up the chord is latched, and the next key
                                                  * starts a new one */
-            if (!keys_down) latched = 1;
+            if (!keys_down && !latched) { latched = 1; latched_at = fm1_ms; }
             return;
         }
         uint32_t j = 0;

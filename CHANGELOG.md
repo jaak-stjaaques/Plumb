@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5 – 2026-11-27
+
+- **LATCH really keeps the chord.** When the keys of a chord come up, one of them can bounce (seen "pressed" again
+  for an instant, on the FM-1's key scan and in the emulator). 0.4 took that for a new chord and kept only that one
+  note. Now a bounce of one of the chord's own notes within 150 ms of the latch is ignored; a new chord still
+  replaces the latched one.
+
 ## 0.4 – 2026-11-27
 
 (An earlier 0.4, 0.5 and 0.6 tried a blooming reverb and a swing echo; they were taken back. This 0.4 is 0.3 plus:)

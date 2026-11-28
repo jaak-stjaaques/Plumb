@@ -1,6 +1,6 @@
 # PLUMB operator manual
 
-PLUMB 0.4 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
+PLUMB 0.5 for the M‑VAVE FM‑1. Twelve pendulums, one row of notes, three oscillator engines.
 
 ## The idea in one minute
 
